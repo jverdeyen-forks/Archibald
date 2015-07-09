@@ -44,7 +44,12 @@ class Request
 
 			case 'tags':
 				$tags = $this->searchTags($this->body);
+                $tagList = $this->getTagList($tags);
 				break;
+
+            case 'random';
+                $tags = $this->searchRandomGif();
+                break;
 
 			case '';
 				echo 'Please provide a tag! e.g. `/archie wow`';
@@ -71,6 +76,14 @@ class Request
 
 		$this->postResponse($responseBody);
 	}
+
+    public function searchRandomGif()
+    {
+        $tags = $this->searchTags('');
+        $randomTag = $tags[array_rand($tags)];
+
+        return $this->searchGif($randomTag->title);
+    }
 
 	public function searchGif($requestString)
 	{
@@ -121,7 +134,8 @@ class Request
 		}
 
 		$responseBody = $response->getBody();
-		$message = $this->getTagList($responseBody);
+
+        return json_decode($responseBody);
 	}
 
 	public function randomGif($responseBody)
@@ -137,10 +151,8 @@ class Request
 		return $gifs[$randomIndex]->file;
 	}
 
-	public function getTagList($responseBody)
+	public function getTagList($tags)
 	{
-		$tags = json_decode($responseBody);
-
 		$tagList = '';
 
 		foreach ($tags as $tag) {
